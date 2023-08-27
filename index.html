@@ -1,159 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-  body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #f0f0f0;
-  }
-  #restartButton {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #4286f4;
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
 
-  .chessboard {
-    display: grid;
-    grid-template-columns: repeat(8, 100px); /* Adjust the size as needed */
-    grid-template-rows: repeat(8, 100px); /* Adjust the size as needed */
-  }
+    <style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f0f0f0;
+    }
+    #restartButton {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #4286f4;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
 
-  .cell {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: white;
-    border: 1px solid #999;
-    font-size: 60px;
-    font-weight: bold;
-  }
+    .chessboard {
+        display: grid;
+        grid-template-columns: repeat(8, 100px); /* Adjust the size as needed */
+        grid-template-rows: repeat(8, 100px); /* Adjust the size as needed */
+    }
 
-  .cell.dark {
-    background-color: #1516155b;
-    /* color: white; */
-  }
-</style>
-</head>
-<body>
-    <nav>
+    .cell {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: white;
+        border: 1px solid #999;
+        font-size: 60px;
+        font-weight: bold;
+    }
 
+    .cell.dark {
+        background-color: #1516155b;
+        /* color: white; */
+    }
+    .selected {
+        background-color: #eebf3f; /* Change this to the desired light color */
+    }
+
+    </style>
+    </head>
+    <body>
+      <nav>
         <button id="restartButton">Restart</button>
-    </nav>
-    <main>
-
-  <div class="chessboard" id="chessboard">
-  </div>
-  </main>
-  <script>
-    class Cell {
-      constructor(coordinates, pieceHtmlDecimal) {
-        this.coordinates = coordinates;
-        this.pieceHtmlDecimal = pieceHtmlDecimal;
-      }
-    }
-
-    // Function to handle cell click
-    function handleCellClick(event) {
-      const clickedCell = event.target;
-      const coordinates = clickedCell.dataset.coordinates;
-      const pieceHtmlDecimal = clickedCell.dataset.pieceHtmlDecimal;
-      const pieceName = clickedCell.dataset.pieceName;
-
-      if (coordinates && pieceHtmlDecimal) {
-        console.log(`Clicked cell: ${coordinates}`);
-        console.log(`Piece Name: ${pieceName}`);
-        console.log(`Piece HTML Decimal: ${pieceHtmlDecimal}`);
-      }
-    }
-
-    const chessboardElement = document.getElementById('chessboard');
-    chessboardElement.addEventListener('click', handleCellClick);
-
-    const chessPieces = [
-      { name: 'white chess king', htmlDecimal: '&#9812;' },
-      { name: 'white chess queen', htmlDecimal: '&#9813;' },
-      { name: 'white chess rook', htmlDecimal: '&#9814;' },
-      { name: 'white chess bishop', htmlDecimal: '&#9815;' },
-      { name: 'white chess knight', htmlDecimal: '&#9816;' },
-      { name: 'white chess pawn', htmlDecimal: '&#9817;' },
-      { name: 'black chess king', htmlDecimal: '&#9818;' },
-      { name: 'black chess queen', htmlDecimal: '&#9819;' },
-      { name: 'black chess rook', htmlDecimal: '&#9820;' },
-      { name: 'black chess bishop', htmlDecimal: '&#9821;' },
-      { name: 'black chess knight', htmlDecimal: '&#9822;' },
-      { name: 'black chess pawn', htmlDecimal: '&#9823;' },
-    ];
-
-    function populateChessboard() {
-  const initialPiecesOrder = [
-    'rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'
-  ];
-
-  let pieceIndex = 0;
-  for (let row = 8; row >= 1; row--) {
-    for (let col = 'A'.charCodeAt(0); col <= 'H'.charCodeAt(0); col++) {
-      const coordinates = String.fromCharCode(col) + row;
-      const cellElement = document.createElement('div');
-      cellElement.className = ((row + col) % 2 === 0) ? 'cell dark' : 'cell';
-      cellElement.id = coordinates;
-      cellElement.dataset.coordinates = coordinates;
-
-      let piece = null;
-
-      if (row === 1) {
-        const colChar = String.fromCharCode(col);
-        const pieceName = `white chess ${initialPiecesOrder[col - 'A'.charCodeAt(0)]}`;
-        piece = chessPieces.find(piece => piece.name === pieceName);
-      } else if (row === 2) {
-        piece = chessPieces.find(piece => piece.name === 'white chess pawn');
-      } else if (row === 7) {
-        piece = chessPieces.find(piece => piece.name === 'black chess pawn');
-      } else if (row === 8) {
-        const colChar = String.fromCharCode(col);
-        const pieceName = `black chess ${initialPiecesOrder[col - 'A'.charCodeAt(0)]}`;
-        piece = chessPieces.find(piece => piece.name === pieceName);
-      }
-
-      if (piece) {
-        cellElement.dataset.pieceHtmlDecimal = piece.htmlDecimal;
-        cellElement.dataset.pieceName = piece.name;
-        cellElement.innerHTML = piece.htmlDecimal;
-      } else {
-        cellElement.dataset.pieceHtmlDecimal = '';
-        cellElement.dataset.pieceName = '';
-        cellElement.innerHTML = '';
-      }
-
-      chessboardElement.appendChild(cellElement);
-    }
-  }
-}
-
-
-    function handleRestartClick() {
-      chessboardElement.innerHTML = '';
-      populateChessboard();
-    }
-
-    const restartButton = document.getElementById('restartButton');
-    restartButton.addEventListener('click', handleRestartClick);
-
-    populateChessboard();
-</script>
-
-</body>
-</html>
+      </nav>
+      <main>
+        <div class="chessboard" id="chessboard">
+          <!-- Your chessboard cells will be generated here -->
+        </div>
+      </main>
+      <!-- Link to your JavaScript file -->
+      <script src="script.js"></script>
+    </body>
+    </html>
