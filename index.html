@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Chess Board</title>
+        <style>
+            /* Define the initial size for the chessboard */
+            table {
+                width: 800px;
+                height: 800px;
+                border-collapse: collapse;
+                table-layout: fixed; /* Ensure equal width and height for cells */
+            }
+    
+            th, td {
+                border: 1px solid black;
+                padding: 0; /* Remove padding to maintain equal cell size */
+                text-align: center;
+                vertical-align: middle; /* Vertically align the content */
+                font-size: 36px; /* Adjust font size for symbols */
+            }
+    
+            /* Styling for alternate cells to create a chessboard pattern */
+            tr:nth-child(even) td:nth-child(odd),
+            tr:nth-child(odd) td:nth-child(even) {
+                background-color: lightgray; /* Change to white or black as needed */
+            }
+    
+            /* Define the styles for chess pieces */
+            .piece {
+                font-family: Arial, sans-serif;
+            }
+    
+            /* Styling for alternate cells with chess pieces */
+            tr:nth-child(even) td.piece:nth-child(odd),
+            tr:nth-child(odd) td.piece:nth-child(even) {
+                background-color: #c0c0c0; /* Light gray for cells with pieces */
+            }
+        </style>
+    </head>
+<body >
+    <table >
+        <thead>
+            <tr>
+                <th></th>
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+                <th>4</th>
+                <th>5</th>
+                <th>6</th>
+                <th>7</th>
+                <th>8</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>A</td>
+                <td>&#9820;</td>
+                <td>&#9822;</td>
+                <td>&#9821;</td>
+                <td>&#9819;</td>
+                <td>&#9818;</td>
+                <td>&#9821;</td>
+                <td>&#9822;</td>
+                <td>&#9820;</td>
+            </tr>
+            <tr>
+                <td>B</td>
+                <td>&#9823;</td>
+                <td>&#9823;</td>
+                <td>&#9823;</td>
+                <td>&#9823;</td>
+                <td>&#9823;</td>
+                <td>&#9823;</td>
+                <td>&#9823;</td>
+                <td>&#9823;</td>
+            </tr>
+            <tr>
+                <td>C</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>D</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>E</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>F</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>G</td>
+                <td>&#9817;</td>
+                <td>&#9817;</td>
+                <td>&#9817;</td>
+                <td>&#9817;</td>
+                <td>&#9817;</td>
+                <td>&#9817;</td>
+                <td>&#9817;</td>
+                <td>&#9817;</td>
+            </tr>
+            <tr>
+                <td>H</td>
+                <td>&#9814;</td>
+                <td>&#9816;</td>
+                <td>&#9815;</td>
+                <td>&#9812;</td>
+                <td>&#9813;</td>
+                <td>&#9815;</td>
+                <td>&#9816;</td>
+                <td>&#9814;</td>
+            </tr>
+            <!-- Repeat similar rows for C to H -->
+        </tbody>
+        <div class="resize-handle" id="resize-handle"></div>
+        <script>
+            const table = document.querySelector("table");
+            const resizeHandle = document.getElementById("resize-handle");
+            let isResizing = false;
+
+            resizeHandle.addEventListener("mousedown", (e) => {
+                isResizing = true;
+            });
+
+            document.addEventListener("mousemove", (e) => {
+                if (!isResizing) return;
+                table.style.width = e.clientX + "px";
+                table.style.height = e.clientY + "px";
+            });
+
+            document.addEventListener("mouseup", () => {
+                isResizing = false;
+            });
+        </script>
+    </table>
+</body>
+</html>
