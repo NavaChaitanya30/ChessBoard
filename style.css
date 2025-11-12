@@ -53,8 +53,8 @@ nav {
 
 .chessboard {
   display: grid;
-  grid-template-columns: repeat(8, 100px);
-  grid-template-rows: repeat(8, 100px);
+  grid-template-columns: repeat(8, minmax(8vw, 80px));
+  grid-template-rows: repeat(8, minmax(8vw, 80px));
   border: 4px solid #333;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
@@ -237,3 +237,18 @@ body {
   transform: scale(1.05);
 }
 
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .chessboard {
+    grid-template-columns: repeat(8, minmax(10vw, 60px));
+    grid-template-rows: repeat(8, minmax(10vw, 60px));
+  }
+
+  .captured-area {
+    font-size: 24px;
+  }
+}
