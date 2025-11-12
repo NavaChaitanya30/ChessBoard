@@ -1,112 +1,131 @@
+const chessboardElement = document.getElementById("chessboard");
+const turnIndicator = document.getElementById("turn-indicator");
+const capturedWhite = document.getElementById("captured-white");
+const capturedBlack = document.getElementById("captured-black");
 
-class Cell {
-    constructor(coordinates, pieceHtmlDecimal) {
-      this.coordinates = coordinates;
-      this.pieceHtmlDecimal = pieceHtmlDecimal;
+let selectedCell = null;
+let currentTurn = "white";
+
+const chessPieces = [
+  { name: "white king", htmlDecimal: "&#9812;" },
+  { name: "white queen", htmlDecimal: "&#9813;" },
+  { name: "white rook", htmlDecimal: "&#9814;" },
+  { name: "white bishop", htmlDecimal: "&#9815;" },
+  { name: "white knight", htmlDecimal: "&#9816;" },
+  { name: "white pawn", htmlDecimal: "&#9817;" },
+  { name: "black king", htmlDecimal: "&#9818;" },
+  { name: "black queen", htmlDecimal: "&#9819;" },
+  { name: "black rook", htmlDecimal: "&#9820;" },
+  { name: "black bishop", htmlDecimal: "&#9821;" },
+  { name: "black knight", htmlDecimal: "&#9822;" },
+  { name: "black pawn", htmlDecimal: "&#9823;" },
+];
+
+function createCell(row, col) {
+  const cell = document.createElement("div");
+  cell.classList.add("cell");
+  cell.classList.add((row + col) % 2 === 0 ? "dark" : "light");
+
+  const colChar = String.fromCharCode(65 + col);
+  const coordinates = colChar + (8 - row);
+  cell.dataset.coordinates = coordinates;
+  return cell;
+}
+
+function populateChessboard() {
+  chessboardElement.innerHTML = "";
+
+  const initialPiecesOrder = ["rook", "knight", "bishop", "queen", "king", "bishop", "knight", "rook"];
+
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const cell = createCell(row, col);
+      const coordinates = cell.dataset.coordinates;
+
+      let piece = null;
+
+      if (row === 1) piece = chessPieces.find(p => p.name === "white pawn");
+      if (row === 6) piece = chessPieces.find(p => p.name === "black pawn");
+      if (row === 0) piece = chessPieces.find(p => p.name === `white ${initialPiecesOrder[col]}`);
+      if (row === 7) piece = chessPieces.find(p => p.name === `black ${initialPiecesOrder[col]}`);
+
+      if (piece) {
+        cell.dataset.piece = piece.name;
+        cell.innerHTML = piece.htmlDecimal;
+      }
+
+      cell.addEventListener("click", handleCellClick);
+      chessboardElement.appendChild(cell);
     }
   }
-        let selectedCell = null;
 
-        function handleCellClick(event) {
-        const clickedCell = event.target;
+  currentTurn = "white";
+  turnIndicator.textContent = "Turn: White ♔";
+  capturedWhite.innerHTML = "";
+  capturedBlack.innerHTML = "";
+}
 
-        if (selectedCell === null) {
-            // First click, selecting a piece
-            if (clickedCell.dataset.pieceHtmlDecimal) {
-            selectedCell = clickedCell;
-            selectedCell.classList.add('selected');
-            }
-        } else {
-            // Second click, moving the piece
-            const coordinates = clickedCell.dataset.coordinates;
+function handleCellClick(event) {
+  const clicked = event.target;
 
-            // Move the piece and update the cells
-            if (coordinates && !clickedCell.dataset.pieceHtmlDecimal) {
-            clickedCell.dataset.pieceHtmlDecimal = selectedCell.dataset.pieceHtmlDecimal;
-            clickedCell.dataset.pieceName = selectedCell.dataset.pieceName;
-            clickedCell.innerHTML = selectedCell.dataset.pieceHtmlDecimal;
+  // Selecting a piece
+  if (!selectedCell) {
+    if (clicked.dataset.piece && clicked.dataset.piece.startsWith(currentTurn)) {
+      selectedCell = clicked;
+      selectedCell.classList.add("selected");
+    }
+    return;
+  }
 
-            selectedCell.dataset.pieceHtmlDecimal = '';
-            selectedCell.dataset.pieceName = '';
-            selectedCell.innerHTML = '';
+  // Clicking again on the same piece
+  if (clicked === selectedCell) {
+    selectedCell.classList.remove("selected");
+    selectedCell = null;
+    return;
+  }
 
-            selectedCell.classList.remove('selected');
-            }
+  const movingPiece = selectedCell.dataset.piece;
+  const targetPiece = clicked.dataset.piece;
+  const from = selectedCell.dataset.coordinates;
+  const to = clicked.dataset.coordinates;
 
-            selectedCell = null; // Clear the selected cell
-        }
-        }
+  // Can't capture your own piece
+  if (targetPiece && targetPiece.startsWith(currentTurn)) return;
 
-        const chessboardElement = document.getElementById('chessboard');
-        chessboardElement.addEventListener('click', handleCellClick);
+  // Get board state (map of coordinates to piece name)
+  const boardState = {};
+  document.querySelectorAll(".cell").forEach(cell => {
+    if (cell.dataset.piece) boardState[cell.dataset.coordinates] = cell.dataset.piece;
+  });
 
-        const chessPieces = [
-        { name: 'white chess king', htmlDecimal: '&#9812;' },
-        { name: 'white chess queen', htmlDecimal: '&#9813;' },
-        { name: 'white chess rook', htmlDecimal: '&#9814;' },
-        { name: 'white chess bishop', htmlDecimal: '&#9815;' },
-        { name: 'white chess knight', htmlDecimal: '&#9816;' },
-        { name: 'white chess pawn', htmlDecimal: '&#9817;' },
-        { name: 'black chess king', htmlDecimal: '&#9818;' },
-        { name: 'black chess queen', htmlDecimal: '&#9819;' },
-        { name: 'black chess rook', htmlDecimal: '&#9820;' },
-        { name: 'black chess bishop', htmlDecimal: '&#9821;' },
-        { name: 'black chess knight', htmlDecimal: '&#9822;' },
-        { name: 'black chess pawn', htmlDecimal: '&#9823;' },
-        ];
+  // Check legality
+  if (!isLegalMove(movingPiece, from, to, boardState)) {
+    console.log("Illegal move!");
+    selectedCell.classList.remove("selected");
+    selectedCell = null;
+    return;
+  }
 
-        function populateChessboard() {
-            const initialPiecesOrder = [
-            'rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'
-            ];
+  // Capture opponent piece
+  if (targetPiece) {
+    const capturedArea = targetPiece.startsWith("white") ? capturedWhite : capturedBlack;
+    capturedArea.innerHTML += clicked.innerHTML;
+  }
 
-            let pieceIndex = 0;
-            for (let row = 8; row >= 1; row--) {
-                for (let col = 'A'.charCodeAt(0); col <= 'H'.charCodeAt(0); col++) {
-                    const coordinates = String.fromCharCode(col) + row;
-                    const cellElement = document.createElement('div');
-                    cellElement.className = ((row + col) % 2 === 0) ? 'cell dark' : 'cell';
-                    cellElement.id = coordinates;
-                    cellElement.dataset.coordinates = coordinates;
+  // Move piece
+  clicked.dataset.piece = movingPiece;
+  clicked.innerHTML = selectedCell.innerHTML;
+  selectedCell.dataset.piece = "";
+  selectedCell.innerHTML = "";
+  selectedCell.classList.remove("selected");
+  selectedCell = null;
 
-                    let piece = null;
-
-                    if (row === 1) {
-                        const colChar = String.fromCharCode(col);
-                        const pieceName = `white chess ${initialPiecesOrder[col - 'A'.charCodeAt(0)]}`;
-                        piece = chessPieces.find(piece => piece.name === pieceName);
-                    } else if (row === 2) {
-                        piece = chessPieces.find(piece => piece.name === 'white chess pawn');
-                    } else if (row === 7) {
-                        piece = chessPieces.find(piece => piece.name === 'black chess pawn');
-                    } else if (row === 8) {
-                        const colChar = String.fromCharCode(col);
-                        const pieceName = `black chess ${initialPiecesOrder[col - 'A'.charCodeAt(0)]}`;
-                        piece = chessPieces.find(piece => piece.name === pieceName);
-                        }
-
-                    if (piece) {
-                        cellElement.dataset.pieceHtmlDecimal = piece.htmlDecimal;
-                        cellElement.dataset.pieceName = piece.name;
-                        cellElement.innerHTML = piece.htmlDecimal;
-                    } else {
-                        cellElement.dataset.pieceHtmlDecimal = '';
-                        cellElement.dataset.pieceName = '';
-                        cellElement.innerHTML = '';
-                    }
-
-                    chessboardElement.appendChild(cellElement);
-                }
-            }
-        }
+  // Switch turn
+  currentTurn = currentTurn === "white" ? "black" : "white";
+  turnIndicator.textContent =
+    currentTurn === "white" ? "Turn: White ♔" : "Turn: Black ♚";
+}
 
 
-    function handleRestartClick() {
-        chessboardElement.innerHTML = '';
-        populateChessboard();
-        }
-
-        const restartButton = document.getElementById('restartButton');
-        restartButton.addEventListener('click', handleRestartClick);
-
-        populateChessboard();
+document.getElementById("restartButton").addEventListener("click", populateChessboard);
+populateChessboard();

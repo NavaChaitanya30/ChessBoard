@@ -44,7 +44,7 @@ function populateChessboard() {
     for (let col = "A".charCodeAt(0); col <= "H".charCodeAt(0); col++) {
       const coordinates = String.fromCharCode(col) + row;
       const cellElement = document.createElement("div");
-      cellElement.className = ((row + col) % 2 === 0) ? "cell dark" : "cell";
+      cellElement.className = ((row + col) % 2 === 0) ? "cell dark" : "cell light";
       cellElement.id = coordinates;
       cellElement.dataset.coordinates = coordinates;
       cellElement.style.position = "relative"; // allow absolute dots
@@ -175,6 +175,8 @@ function handleCellClick(event) {
 
   // === Only allow move if it's a valid reachable cell ===
   if (targetCell !== selectedCell && (isCapture || hasDot)) {
+      document.querySelectorAll(".last-move").forEach(cell => cell.classList.remove("last-move"));
+
     // === CASE 4A: Perform Capture ===
     if (isCapture && targetPiece && targetColor !== currentTurn) {
       const capturedArea =
@@ -204,6 +206,9 @@ function handleCellClick(event) {
     selectedCell.dataset.pieceHtmlDecimal = "";
     selectedCell.dataset.pieceName = "";
     selectedCell.innerHTML = "";
+    // ✅ Highlight the last move
+    selectedCell.classList.add("last-move");
+    targetCell.classList.add("last-move");
 
     moveMade = true;
   } else {

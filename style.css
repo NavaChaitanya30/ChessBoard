@@ -53,8 +53,8 @@ nav {
 
 .chessboard {
   display: grid;
-  grid-template-columns: repeat(8, minmax(8vw, 80px));
-  grid-template-rows: repeat(8, minmax(8vw, 80px));
+  grid-template-columns: repeat(8, minmax(5vw, 60px));
+  grid-template-rows: repeat(8, minmax(5vw, 60px));
   border: 4px solid #333;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
@@ -71,15 +71,15 @@ nav {
   filter: none !important;
 }
 
-.cell {
+.cell.light {
   background-color: #fcfdfd !important; /* Pure white */
-  opacity: 1 !important; /* Ensure fully opaque */
+  opacity: 1 ; /* Ensure fully opaque */
 }
 
 .cell.dark {
   background-color: #769656 !important;
   opacity: 1;
-  isolation: isolate;
+  
 }
 
 
@@ -109,7 +109,7 @@ nav {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 80px;
+  font-size: 65px;
   transition: 0.4s;
   font-weight: bold;
   overflow: hidden;
@@ -130,7 +130,7 @@ nav {
 }
 
 .capture-cell {
-  box-shadow: inset 0 0 0 5px rgba(255, 0, 0, 0.6);
+  box-shadow: inset 0 0 0 5px rgb(255, 0, 0) !important;
 }
 #toast-container {
   position: fixed;
@@ -244,11 +244,21 @@ body {
   }
 
   .chessboard {
-    grid-template-columns: repeat(8, minmax(10vw, 60px));
-    grid-template-rows: repeat(8, minmax(10vw, 60px));
+    grid-template-columns: repeat(8, minmax(8vw, 30px));
+    grid-template-rows: repeat(8, minmax(8vw, 30px));
   }
 
   .captured-area {
     font-size: 24px;
   }
+}
+.last-move {
+  box-shadow: inset 0 0 0 4px rgba(255, 147, 6, 0.8); /* gold highlight */
+  animation: flash 0.3s ease-in-out;
+}
+
+@keyframes flash {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
