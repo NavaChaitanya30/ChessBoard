@@ -124,10 +124,10 @@ function handleCellClick(event) {
       selectedCell = clickedCell;
       selectedCell.classList.add("selected");
       showPossibleMoves(clickedCell); // show move/capture indicators
-      showToast(
-        `${capitalize(currentTurn)} selected ${clickedCell.dataset.pieceName.split(" ").slice(2).join(" ")}`,
-        "info"
-      );
+    //   showToast(
+    //     `${capitalize(currentTurn)} selected ${clickedCell.dataset.pieceName.split(" ").slice(2).join(" ")}`,
+    //     "info"
+    //   );
     } else {
       showToast("Please select your own piece.", "warning");
     }
@@ -139,7 +139,7 @@ function handleCellClick(event) {
     selectedCell.classList.remove("selected");
     clearMoveIndicators();
     selectedCell = null;
-    showToast("Selection cancelled.", "info");
+    //showToast("Selection cancelled.", "info");
     return;
   }
 
@@ -153,10 +153,10 @@ function handleCellClick(event) {
     selectedCell = clickedCell;
     selectedCell.classList.add("selected");
     showPossibleMoves(clickedCell);
-    showToast(
-      `${capitalize(currentTurn)} switched selection to ${clickedCell.dataset.pieceName.split(" ").slice(2).join(" ")}`,
-      "info"
-    );
+    // showToast(
+    //   `${capitalize(currentTurn)} switched selection to ${clickedCell.dataset.pieceName.split(" ").slice(2).join(" ")}`,
+    //   "info"
+    // );
     return;
   }
 
