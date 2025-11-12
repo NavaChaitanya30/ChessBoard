@@ -215,6 +215,15 @@ function handleCellClick(event) {
     // Invalid click (not a valid move or capture cell)
     showToast("Invalid move! Select a highlighted cell.", "error");
   }
+  if (movingName.includes("pawn")) {
+  const isWhite = getPieceColor(movingName) === "white";
+  const targetRow = parseInt(targetCell.dataset.coordinates[1]);
+  
+  // Check if pawn reached last rank
+  if ((isWhite && targetRow === 8) || (!isWhite && targetRow === 1)) {
+    showPawnPromotion(targetCell, isWhite);
+  }
+}
 
   // === CASE 5: Cleanup ===
   selectedCell.classList.remove("selected");
@@ -296,6 +305,33 @@ function getPawnMoves(cell) {
 
   return possibleMoves;
 }
+//pawn promotion
+function showPawnPromotion(cell, isWhite) {
+  const modal = document.getElementById("promotionModal");
+  modal.classList.remove("hidden");
+
+  const buttons = modal.querySelectorAll("button");
+
+  buttons.forEach(btn => {
+    btn.onclick = () => {
+      const pieceType = btn.dataset.piece;
+      const promotedPiece =
+        pieceType === "queen" ? (isWhite ? "&#9813;" : "&#9819;") :
+        pieceType === "rook"  ? (isWhite ? "&#9814;" : "&#9820;") :
+        pieceType === "bishop"? (isWhite ? "&#9815;" : "&#9821;") :
+                                (isWhite ? "&#9816;" : "&#9822;");
+
+      cell.dataset.pieceHtmlDecimal = promotedPiece;
+      cell.dataset.pieceName = `${isWhite ? "white" : "black"}_${pieceType}`;
+      cell.innerHTML = `<span class="piece">${promotedPiece}</span>`;
+
+      modal.classList.add("hidden");
+
+      showToast(`${isWhite ? "White" : "Black"} pawn promoted to ${pieceType}!`, "success");
+    };
+  });
+}
+
 //rook
 function getRookMoves(cell) {
   return exploreDirections(cell, [

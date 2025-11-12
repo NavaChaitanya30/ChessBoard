@@ -110,7 +110,8 @@ nav {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 65px;
+  font-size: 8vw; /* auto scales with viewport width */
+  font-size: clamp(26px, 5vw, 65px); /* responsive but capped */
   transition: 0.4s;
   font-weight: bold;
   overflow: hidden;
@@ -262,4 +263,44 @@ body {
   0% { transform: scale(1); }
   50% { transform: scale(1.05); }
   100% { transform: scale(1); }
+}
+/* Pawn promotion popup */
+.promotion-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.promotion-modal.hidden {
+  display: none;
+}
+
+.promotion-content {
+  background: white;
+  padding: 20px 30px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.promotion-options button {
+  font-size: 40px;
+  margin: 10px;
+  background: none;
+  border: 2px solid #333;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
+}
+
+.promotion-options button:hover {
+  transform: scale(1.2);
+  background: #f0f0f0;
 }
