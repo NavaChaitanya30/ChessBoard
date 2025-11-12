@@ -64,7 +64,8 @@ nav {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 60px;
+  font-size: 6vw; /* auto scales with viewport width */
+  font-size: clamp(24px, 4vw, 60px); /* responsive but capped */
   font-weight: 200;
   overflow: hidden;
   mix-blend-mode: normal !important;
