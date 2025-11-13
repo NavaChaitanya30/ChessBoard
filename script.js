@@ -375,10 +375,53 @@
   function showToast(msg, type='info', ttl=3000){ const t = document.createElement('div'); t.className='toast '+type; t.textContent=msg; DOM.toast.appendChild(t); setTimeout(()=>{ t.classList.add('fade'); t.remove(); }, ttl); }
 
   /* =================== Promotion modal =================== */
-  function showPromotionModal(preMeta, onPick){ DOM.promotionOverlay.classList.remove('hidden'); DOM.promoChoices.innerHTML=''; const choices=['queen','rook','bishop','knight']; for(const c of choices){ const b=document.createElement('button'); b.textContent = PIECE_UNICODE[c][preMeta.moving.color]; b.addEventListener('click', ()=>{ DOM.promotionOverlay.classList.add('hidden'); onPick(c); }); DOM.promoChoices.appendChild(b); } }
+  function showPromotionModal(preMeta, onPick){
+    // If there's a promotion overlay with a choices container, populate it.
+    if(DOM.promotionOverlay){
+      DOM.promotionOverlay.classList.remove('hidden');
+      // If promoChoices container exists, build buttons there
+      if(DOM.promoChoices){
+        DOM.promoChoices.innerHTML='';
+        const choices=['queen','rook','bishop','knight'];
+        for(const c of choices){
+          const b=document.createElement('button');
+          b.textContent = PIECE_UNICODE[c][preMeta.moving.color];
+          b.dataset.piece = c;
+          b.addEventListener('click', ()=>{ DOM.promotionOverlay.classList.add('hidden'); onPick(c); });
+          DOM.promoChoices.appendChild(b);
+        }
+        return;
+      }
+
+      // Otherwise, try to attach handlers to existing buttons inside the overlay
+      const existing = DOM.promotionOverlay.querySelectorAll('button[data-piece]');
+      if(existing && existing.length){
+        existing.forEach(b=>{
+          const piece = b.dataset.piece;
+          const handler = ()=>{ DOM.promotionOverlay.classList.add('hidden'); onPick(piece); };
+          b.addEventListener('click', handler, {once:true});
+        });
+        return;
+      }
+    }
+
+    // Fallback: use a prompt (not ideal but keeps functionality working)
+    const choice = prompt('Promote to (queen, rook, bishop, knight):','queen');
+    const allowed = ['queen','rook','bishop','knight'];
+    if(choice && allowed.includes(choice.toLowerCase())) onPick(choice.toLowerCase()); else onPick('queen');
+  }
 
   /* =================== Game End modal =================== */
-  function showGameEndModal(title, message){ DOM.gameendTitle.textContent = title; DOM.gameendMessage.textContent = message; DOM.gameendOverlay.classList.remove('hidden'); }
+  function showGameEndModal(title, message){
+    if(DOM.gameendOverlay && DOM.gameendTitle && DOM.gameendMessage){
+      DOM.gameendTitle.textContent = title;
+      DOM.gameendMessage.textContent = message;
+      DOM.gameendOverlay.classList.remove('hidden');
+    } else {
+      // fallback: simple alert
+      alert(title + '\n' + message);
+    }
+  }
 
   /* =================== UI Event Handlers =================== */
   function handleCellClick(e){ const cell = e.currentTarget; const s = cell.dataset.square; if(selectedSquare===null){ // no selection
@@ -396,29 +439,47 @@
   let activeTimerColor = null;
   function startTimer(color){ stopTimer(); activeTimerColor = color; DOM.timerWhite.classList.toggle('active', color==='white'); DOM.timerBlack.classList.toggle('active', color==='black'); timerInterval = setInterval(()=>{ if(gamePaused||gameOver) return; timers[color]--; if(timers[color]<=0){ clearInterval(timerInterval); gameOver=true; gamePaused=true; showGameEndModal('Time\'s Up!', oppositeColor(color)+' Wins!'); } updateTimersDisplay(); },1000); }
   function stopTimer(){ if(timerInterval) clearInterval(timerInterval); timerInterval=null; activeTimerColor=null; DOM.timerWhite.classList.remove('active'); DOM.timerBlack.classList.remove('active'); }
-  function updateTimersDisplay(){ DOM.timerWhite.textContent = `White: ${formatTime(timers.white)}`; DOM.timerBlack.textContent = `Black: ${formatTime(timers.black)}`; }
+  function updateTimersDisplay(){
+    if(DOM.timerWhite) DOM.timerWhite.textContent = formatTime(timers.white);
+    if(DOM.timerBlack) DOM.timerBlack.textContent = formatTime(timers.black);
+  }
 
   /* =================== Controls binding =================== */
   let isDarkMode = false;
   function bindControls(){ DOM.btnStart.addEventListener('click', ()=>{ DOM.startOverlay.classList.remove('hidden'); });
-    DOM.overlayStart.addEventListener('click', ()=>{ const mins = Math.max(1, parseInt(DOM.inputMinutes.value)||10); timers.white = timers.black = mins*60; gamePaused=false; DOM.startOverlay.classList.add('hidden'); startTimer(currentTurn); renderBoard(true); });
-    DOM.btnPause.addEventListener('click', ()=>{ gamePaused=true; stopTimer(); DOM.pausedOverlay.classList.remove('hidden'); });
-    DOM.overlayResume.addEventListener('click', ()=>{ gamePaused=false; DOM.pausedOverlay.classList.add('hidden'); startTimer(currentTurn); });
-    DOM.btnRestart.addEventListener('click', ()=>{ initBoard(); renderBoard(true); DOM.startOverlay.classList.remove('hidden'); stopTimer(); });
-    DOM.btnUndo.addEventListener('click', ()=>{ undo(); });
-    DOM.btnRedo.addEventListener('click', ()=>{ redo(); });
-    DOM.themeToggle.addEventListener('click', ()=>{ isDarkMode = !isDarkMode; document.documentElement.classList.toggle('dark-ui', isDarkMode); DOM.themeToggle.classList.toggle('dark', isDarkMode); DOM.themeToggle.textContent = isDarkMode ? '🌙 Dark' : '☀️ Light'; });
-    DOM.overlayPlayAgain.addEventListener('click', ()=>{ DOM.gameendOverlay.classList.add('hidden'); initBoard(); renderBoard(true); DOM.startOverlay.classList.remove('hidden'); stopTimer(); });
+    // Bind if elements exist (some HTML variants don't have overlays/buttons)
+    if(DOM.overlayStart) DOM.overlayStart.addEventListener('click', ()=>{ const mins = Math.max(1, parseInt(DOM.inputMinutes.value)||10); timers.white = timers.black = mins*60; gamePaused=false; if(DOM.startOverlay) DOM.startOverlay.classList.add('hidden'); startTimer(currentTurn); renderBoard(true); });
+    if(DOM.btnPause) DOM.btnPause.addEventListener('click', ()=>{ gamePaused=true; stopTimer(); if(DOM.pausedOverlay) DOM.pausedOverlay.classList.remove('hidden'); });
+    if(DOM.overlayResume) DOM.overlayResume.addEventListener('click', ()=>{ gamePaused=false; if(DOM.pausedOverlay) DOM.pausedOverlay.classList.add('hidden'); startTimer(currentTurn); });
+    if(DOM.btnRestart) DOM.btnRestart.addEventListener('click', ()=>{ initBoard(); renderBoard(true); if(DOM.startOverlay) DOM.startOverlay.classList.remove('hidden'); stopTimer(); });
+    if(DOM.btnUndo) DOM.btnUndo.addEventListener('click', ()=>{ undo(); });
+    if(DOM.btnRedo) DOM.btnRedo.addEventListener('click', ()=>{ redo(); });
+    if(DOM.themeToggle) DOM.themeToggle.addEventListener('click', ()=>{ isDarkMode = !isDarkMode; document.documentElement.classList.toggle('dark-ui', isDarkMode); if(DOM.themeToggle) DOM.themeToggle.classList.toggle('dark', isDarkMode); DOM.themeToggle.textContent = isDarkMode ? '🌙 Dark' : '☀️ Light'; });
+    if(DOM.overlayPlayAgain) DOM.overlayPlayAgain.addEventListener('click', ()=>{ if(DOM.gameendOverlay) DOM.gameendOverlay.classList.add('hidden'); initBoard(); renderBoard(true); if(DOM.startOverlay) DOM.startOverlay.classList.remove('hidden'); stopTimer(); });
   }
 
   /* =================== Init =================== */
   function init(){
     // cache DOM
-    DOM.board = document.getElementById('board'); DOM.capturedWhite = document.getElementById('captured-white'); DOM.capturedBlack = document.getElementById('captured-black'); DOM.timerWhite = document.getElementById('timer-white'); DOM.timerBlack = document.getElementById('timer-black'); DOM.toast = document.getElementById('toast-container');
-    DOM.startOverlay = document.getElementById('start-overlay'); DOM.promotionOverlay = document.getElementById('promotion-overlay'); DOM.pausedOverlay = document.getElementById('paused-overlay'); DOM.gameendOverlay = document.getElementById('gameend-overlay'); DOM.gameendTitle = document.getElementById('gameend-title'); DOM.gameendMessage = document.getElementById('gameend-message'); DOM.promoChoices = document.getElementById('promo-choices');
-    DOM.btnStart = document.getElementById('btn-start'); DOM.btnPause = document.getElementById('btn-pause'); DOM.btnRestart = document.getElementById('btn-restart'); DOM.btnUndo = document.getElementById('btn-undo'); DOM.btnRedo = document.getElementById('btn-redo'); DOM.themeToggle = document.getElementById('btn-theme'); DOM.inputMinutes = document.getElementById('input-minutes'); DOM.overlayStart = document.getElementById('overlay-start'); DOM.overlayResume = document.getElementById('overlay-resume'); DOM.overlayPlayAgain = document.getElementById('overlay-playagain');
+    // board: accept either 'board' or 'chessboard' id (index.html uses 'chessboard')
+    DOM.board = document.getElementById('board') || document.getElementById('chessboard');
+    DOM.capturedWhite = document.getElementById('captured-white'); DOM.capturedBlack = document.getElementById('captured-black');
+    // timers: accept camelCase or kebab-case ids
+    DOM.timerWhite = document.getElementById('timer-white') || document.getElementById('timerWhite'); DOM.timerBlack = document.getElementById('timer-black') || document.getElementById('timerBlack');
+    DOM.toast = document.getElementById('toast-container') || document.createElement('div'); if(!document.getElementById('toast-container')){ DOM.toast.id='toast-container'; document.body.appendChild(DOM.toast); }
 
-    bindControls(); initBoard(); renderBoard(true); DOM.startOverlay.classList.remove('hidden');
+    // overlays and promotion modal fallbacks: index.html uses 'promotionModal'
+    DOM.startOverlay = document.getElementById('start-overlay'); DOM.promotionOverlay = document.getElementById('promotion-overlay') || document.getElementById('promotionModal'); DOM.pausedOverlay = document.getElementById('paused-overlay'); DOM.gameendOverlay = document.getElementById('gameend-overlay'); DOM.gameendTitle = document.getElementById('gameend-title'); DOM.gameendMessage = document.getElementById('gameend-message'); DOM.promoChoices = document.getElementById('promo-choices');
+
+    // control buttons: accept multiple naming conventions (older html uses undoButton/restartButton/redoButton)
+    DOM.btnStart = document.getElementById('btn-start'); DOM.btnPause = document.getElementById('btn-pause');
+    DOM.btnRestart = document.getElementById('btn-restart') || document.getElementById('restartButton');
+    DOM.btnUndo = document.getElementById('btn-undo') || document.getElementById('undoButton');
+    DOM.btnRedo = document.getElementById('btn-redo') || document.getElementById('redoButton');
+    DOM.themeToggle = document.getElementById('btn-theme') || document.getElementById('themeToggle'); DOM.inputMinutes = document.getElementById('input-minutes');
+    DOM.overlayStart = document.getElementById('overlay-start'); DOM.overlayResume = document.getElementById('overlay-resume'); DOM.overlayPlayAgain = document.getElementById('overlay-playagain');
+
+  bindControls(); initBoard(); renderBoard(true); if(DOM.startOverlay) DOM.startOverlay.classList.remove('hidden');
     // keyboard navigation basic
     window.addEventListener('keydown',(e)=>{
       if(e.key==='Escape'){ clearHighlights(); selectedSquare=null; }
