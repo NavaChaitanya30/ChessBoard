@@ -3,8 +3,7 @@
   Sections: Helpers, Board/State, Move Generation, Legality & Check, Move Execution & History,
   UI, Timers, Undo/Redo, Init
 */
-(function(){
-  'use strict';
+
 
   /* =================== Constants & Globals =================== */
   const FILES = ['a','b','c','d','e','f','g','h'];
@@ -431,4 +430,3 @@
 
   init();
 
-})();
