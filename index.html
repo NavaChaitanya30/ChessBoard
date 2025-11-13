@@ -1,55 +1,86 @@
-<!DOCTYPE html>
+<!doctype html>
+<!--
+  Minimal 3-file Chess
+  All runtime instructions are embedded below. Place index.html, style.css and script.js
+  at repo root and enable GitHub Pages to deploy.
+-->
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chessboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Minimal 3-file Chess</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- style.css loaded at top as required -->
 </head>
 <body>
-  <button id="themeToggle">🌙 Dark Mode</button>
-
-  <!-- This wrapper is EXCLUDED from theme changes -->
-  <div id="game-container">
-    <main>
-      <div id="toast-container"></div>
-
-      <div class="container">
-        <div class="captured">
-          <h3 style="color: green;">Captured (White)</h3>
-          <div id="captured-white" class="captured-area"></div>
-        </div>
-
-        <div class="chessboard" id="chessboard"></div>
-
-        <div class="captured">
-          <h3 style="color: green;">Captured (Black)</h3>
-          <div id="captured-black" class="captured-area"></div>
-        </div>
-      </div>
-
-      <div id="turn-indicator" style="color: green;">Turn: White ♔</div>
-    </main>
-    <!-- Pawn Promotion Modal -->
-<div id="promotionModal" class="promotion-modal hidden">
-  <div class="promotion-content">
-    <h3>Choose a piece:</h3>
-    <div class="promotion-options">
-      <button data-piece="queen">♕</button>
-      <button data-piece="rook">♖</button>
-      <button data-piece="bishop">♗</button>
-      <button data-piece="knight">♘</button>
+  <header>
+    
+    <div class="controls-top">
+      <button id="btn-start" aria-label="Start game">Start</button>
+      <button id="btn-pause" aria-label="Pause game">Pause</button>
+      <button id="btn-restart" aria-label="Restart game">Restart</button>
+      <button id="btn-theme" class="theme-toggle" aria-label="Toggle dark mode">☀️ Light</button>
     </div>
-  </div>
-</div>
+  </header>
 
+  <main>
+    <div id="game-container">
+      <aside class="sideboard left">
+        <div class="timer" id="timer-white" aria-live="polite">White: 10:00</div>
+        <div class="captured-area" id="captured-white" aria-label="White captured pieces"></div>
+      </aside>
 
-    <nav>
-      <button id="restartButton">Restart</button>
-    </nav>
-  </div>
-  <script src="chess.js"></script>
+      <section id="board-wrap">
+        <div id="board" role="grid" aria-label="Chess board"></div>
+        <div class="board-controls">
+          <button id="btn-undo" aria-label="Undo">↶ Undo</button>
+          <button id="btn-redo" aria-label="Redo">↷ Redo</button>
+        </div>
+      </section>
+
+      <aside class="sideboard right">
+        <div class="captured-area" id="captured-black" aria-label="Black captured pieces"></div>
+        <div class="timer" id="timer-black" aria-live="polite">Black: 10:00</div>
+      </aside>
+    </div>
+
+    <!-- overlays -->
+    <div class="overlay" id="start-overlay">
+      <div class="overlay-panel">
+        <h2>Start Game</h2>
+        <label>Time per side (minutes): <input id="input-minutes" type="number" min="1" max="120" value="10"></label>
+        <div class="overlay-actions"><button id="overlay-start">Start</button></div>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="promotion-overlay">
+      <div class="overlay-panel">
+        <h2>Promote Pawn</h2>
+        <div class="promo-choices" id="promo-choices"></div>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="paused-overlay">
+      <div class="overlay-panel">
+        <h2>Game Paused</h2>
+        <div class="overlay-actions"><button id="overlay-resume">Resume</button></div>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="gameend-overlay">
+      <div class="overlay-panel overlay-panel-gameend">
+        <h2 id="gameend-title">Game Over</h2>
+        <p id="gameend-message"></p>
+        <div class="overlay-actions"><button id="overlay-playagain">Play Again</button></div>
+      </div>
+    </div>
+
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+  </main>
+
+  
+
+  <script src="script.js"></script>
+  <!-- script.js loaded at bottom as required -->
 </body>
-
-
 </html>
